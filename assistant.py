@@ -4,6 +4,8 @@ import openai
 from gtts import gTTS
 import speech_recognition as sr
 import pygame
+from pydub import AudioSegment
+from pydub.playback import play
 
 load_dotenv()
 
