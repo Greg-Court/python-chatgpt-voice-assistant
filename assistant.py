@@ -42,11 +42,16 @@ def listen_for_command():
         recognizer.adjust_for_ambient_noise(source)
         print("Adjusted for ambient noise.")
         print("Listening for 'computer'...")
-        audio = recognizer.listen(source, timeout=10)  # Adjust the timeout as needed
+        audio = recognizer.listen(source, timeout=10)
         try:
+            print("Sending audio to Google for transcription...")
             text = recognizer.recognize_google(audio)
             end_time = time.time()
-            print(f"Voice to text conversion took {end_time - start_time:.2f} seconds.")
+            print(
+                f"Received transcription from Google. Voice to text conversion took {end_time - start_time:.2f} seconds."
+            )
+            if "computer" in text.lower():
+                print("Computer command detected.")
             return text.lower()
         except sr.UnknownValueError:
             print("Failed to recognize the command.")
@@ -55,9 +60,10 @@ def listen_for_command():
 
 def get_response_from_openai(user_input):
     start_time = time.time()
+    print("Sending command to OpenAI...")
 
     completion = openai.ChatCompletion.create(
-        model="gpt-4-0314",  # Ensure you're using the right model name
+        model="gpt-4-0314",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": user_input},
@@ -66,7 +72,9 @@ def get_response_from_openai(user_input):
     )
 
     end_time = time.time()
-    print(f"OpenAI GPT response generation took {end_time - start_time:.2f} seconds.")
+    print(
+        f"Received response from OpenAI. Response generation took {end_time - start_time:.2f} seconds."
+    )
     return completion.choices[0].message["content"]
 
 
@@ -79,10 +87,11 @@ while True:
         with sr.Microphone() as source:
             audio = recognizer.listen(source)
             try:
+                print("Sending audio to Google for transcription...")
                 user_command = recognizer.recognize_google(audio)
                 end_time = time.time()
                 print(
-                    f"Voice to text conversion took {end_time - start_time:.2f} seconds."
+                    f"Received transcription from Google. Voice to text conversion took {end_time - start_time:.2f} seconds."
                 )
                 response = get_response_from_openai(user_command)
                 print(response)
