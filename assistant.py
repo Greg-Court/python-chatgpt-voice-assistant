@@ -19,6 +19,22 @@ print("Recognizer and microphone initialized.")
 pygame.mixer.init()  # initialize pygame mixer for playing audio
 print("Pygame mixer initialized.")
 
+PERSONALITIES = {
+    'ali_g': "You are designed to be an actor that speaks similar to Ali G. You're a propa gangsta bruv and u like to be a proper joker. Ur a top G. U love to mess around and cause chaos and give crazy answers. ",
+    'stephen_king': "You are the writer Stephen King. You are deep and introspective. Your responses are to be of similar calibre to his writing. ",
+    'helpful': "You are a helpful assistant."
+}
+
+VERBOSITIES = {
+    'short': "Your responses are always short.",
+    'medium': "Your responses are always moderate in length.",
+    'long': "Your responses are always long."
+}
+
+chosen_personality = 'ali_g'
+chosen_verbosity = 'short'
+
+system_context = PERSONALITIES[chosen_personality] + VERBOSITIES[chosen_verbosity]
 
 def speak(text):
     start_time = time.time()
@@ -32,23 +48,23 @@ def speak(text):
     os.remove("temp.mp3")
 
     end_time = time.time()
-    print(f"Converting text to speech took {end_time - start_time:.2f} seconds.")
+    print(f"Google text to speech conversion took {end_time - start_time:.2f} seconds.")
 
 
 def listen_for_command():
-    start_time = time.time()
-
     with sr.Microphone() as source:
         recognizer.adjust_for_ambient_noise(source)
-        print("Adjusted for ambient noise.")
+        print("\nAdjusted for ambient noise.")
         print("Listening for 'computer'...")
-        audio = recognizer.listen(source, timeout=10)
+        audio = recognizer.listen(source, timeout=1000)
+        
         try:
-            print("Sending audio to Google for transcription...")
+            print("\nSending audio to Google for transcription...")
+            start_time = time.time()
             text = recognizer.recognize_google(audio)
             end_time = time.time()
             print(
-                f"Received transcription from Google. Voice to text conversion took {end_time - start_time:.2f} seconds."
+                f"Google speech to text took {end_time - start_time:.2f} seconds."
             )
             if "computer" in text.lower():
                 print("Computer command detected.")
@@ -60,23 +76,24 @@ def listen_for_command():
 
 def get_response_from_openai(user_input):
     start_time = time.time()
-    print("Sending command to OpenAI...")
+    print("\nSending to OpenAI:")
+    print(user_input)
 
     completion = openai.ChatCompletion.create(
         model="gpt-4-0314",
         messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
+            # {"role": "system", "content": "You are designed to be an actor that speaks similar to Ali G. You're a propa gangsta bruv and u like to be a proper joker. Ur a top G. U love to mess around and cause chaos and give crazy answers."},
+            {"role": "system", "content": system_context},
             {"role": "user", "content": user_input},
         ],
-        max_tokens=128,
+        max_tokens=1024,
     )
 
     end_time = time.time()
     print(
-        f"Received response from OpenAI. Response generation took {end_time - start_time:.2f} seconds."
+        f"Response from OpenAI generation took {end_time - start_time:.2f} seconds:\n)"
     )
     return completion.choices[0].message["content"]
-
 
 while True:
     command = listen_for_command()
@@ -91,7 +108,7 @@ while True:
                 user_command = recognizer.recognize_google(audio)
                 end_time = time.time()
                 print(
-                    f"Received transcription from Google. Voice to text conversion took {end_time - start_time:.2f} seconds."
+                    f"\nReceived transcription from Google. Voice to text conversion took {end_time - start_time:.2f} seconds."
                 )
                 response = get_response_from_openai(user_command)
                 print(response)
