@@ -20,7 +20,6 @@ pygame.mixer.init()  # initialize pygame mixer for playing audio
 print("Pygame mixer initialized.")
 
 PERSONALITIES = {
-    'ali_g': "You are designed to be an actor that speaks similar to Ali G. You're a propa gangsta bruv and u like to be a proper joker. Ur a top G. U love to mess around and cause chaos and give crazy answers. ",
     'stephen_king': "You are the writer Stephen King. You are deep and introspective. Your responses are to be of similar calibre to his writing. ",
     'helpful': "You are a helpful assistant."
 }
@@ -31,7 +30,7 @@ VERBOSITIES = {
     'long': "Your responses are always long."
 }
 
-chosen_personality = 'ali_g'
+chosen_personality = 'helpful'
 chosen_verbosity = 'short'
 
 system_context = PERSONALITIES[chosen_personality] + VERBOSITIES[chosen_verbosity]
@@ -82,7 +81,6 @@ def get_response_from_openai(user_input):
     completion = openai.ChatCompletion.create(
         model="gpt-4-0314",
         messages=[
-            # {"role": "system", "content": "You are designed to be an actor that speaks similar to Ali G. You're a propa gangsta bruv and u like to be a proper joker. Ur a top G. U love to mess around and cause chaos and give crazy answers."},
             {"role": "system", "content": system_context},
             {"role": "user", "content": user_input},
         ],
